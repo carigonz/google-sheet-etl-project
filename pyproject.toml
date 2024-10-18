@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "etl-test"
+version = "0.1.0"
+description = ""
+authors = ["carigonz <carolinagonzalez@gmail.com>"]
+readme = "README.md"
+packages = [
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pandas = "^2.2.3"
+pdfplumber = "^0.11.4"
+pypdf2 = "^3.0.1"
+gspread = "^6.1.3"
+oauth2client = "^4.1.3"
+opencv-python = "^4.10.0.84"
+google-auth = "^2.35.0"
+google-auth-oauthlib = "^1.2.1"
+google-auth-httplib2 = "^0.2.0"
+google-api-python-client = "^2.149.0"
+requests = "^2.32.3"
+python-dotenv = "^1.0.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
