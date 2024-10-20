@@ -31,7 +31,7 @@ def create_postgres_connection() -> Engine | Exception:
     # if not all([DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME]):
     #     raise ValueError("Missing required database connection information in environment variables.")
     host = 'redshift-pda-cluster.cnuimntownzt.us-east-2.redshift.amazonaws.com'
-    password = None
+    password = 'J7!&L2^Q$4xR'
     try:
         connection_string = \
             f"postgresql+psycopg2://2024_carolina_gonzalez:{password}@{host}:5439/pda"
