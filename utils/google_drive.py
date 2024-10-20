@@ -134,7 +134,7 @@ def download_pdf_from_drive(file_id: str):
     try:
         credentials = Credentials.from_service_account_file(CREDENTIALS_FILE,
                                                             scopes=['https://www.googleapis.com/auth/drive.readonly'])
-    except Exception as e:
+    except Exception:
         raise ValueError("No credentials provided")
 
     drive_service = build('drive', 'v3', credentials=credentials)
