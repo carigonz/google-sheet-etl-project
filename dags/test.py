@@ -1,14 +1,15 @@
-from functions.transform_data import transform_initial_data
-from functions.extract_data import extract_initial_data
-from functions.load_data import load_data
 import sys
 import os
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-from airflow.utils.dates import days_ago
 
 # Add the parent directory of 'dags' to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from functions.transform_data import transform_initial_data  # noqa: E402
+from functions.extract_data import extract_initial_data  # noqa: E402
+from functions.load_data import load_data  # noqa: E402
+from airflow import DAG  # noqa: E402
+from airflow.operators.python import PythonOperator  # noqa: E402
+from airflow.utils.dates import days_ago  # noqa: E402
 
 
 with DAG(

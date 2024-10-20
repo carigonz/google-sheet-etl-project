@@ -13,6 +13,8 @@ RUN poetry install --no-root
 # Copia el resto de los archivos del proyecto
 COPY . /opt/airflow/
 
+COPY .env .env
+
 ENV DB_HOST=${DB_HOST}
 ENV DB_PORT=${DB_PORT}
 ENV DB_NAME=${DB_NAME}
