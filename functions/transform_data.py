@@ -55,14 +55,15 @@ def convert_data_types(df: pd.DataFrame, df_tables: pd.DataFrame) -> tuple[pd.Da
     df_tables['quantity'] = df_tables['quantity'].str.replace(',', '.')\
         .str.extract('(\d+\.?\d*)').astype(float)  # noqa: W605
     if 'total_amount' in df_tables.columns and df_tables['total_amount'].notna().any():
-        df_tables['total_amount'] = df_tables['total_amount'].str.replace('$', '', regex=False)\
-            .str.replace('.', '', regex=False).str.replace(',', '.', regex=False).astype(float)
+        df_tables['total_amount'] = df_tables['total_amount']\
+            .str.replace('$', '', regex=False)\
+            .str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
     if 'devolution_type' in df_tables.columns and df_tables['devolution_type'].notna().any():
         df_tables['devolution_type'] = df_tables['devolution_type'].str.replace('\n', ' ').str.strip()
 
     if 'pvp' in df_tables.columns and df_tables['pvp'].notna().any():
         df_tables['pvp'] = df_tables['pvp'].str.replace('$', '', regex=False)\
-            .str.replace('.', '', regex=False).str.replace(',', '.', regex=False).astype(float)
+            .str.replace('.', '', regex=False).str.replace(',', '.', regex=False)
 
     return df, df_tables
 
@@ -96,7 +97,6 @@ def map_custom_columns(df: pd.DataFrame, df_tables: pd.DataFrame) -> tuple[pd.Da
     Returns:
         tuple[pd.DataFrame, pd.DataFrame]: A tuple containing the DataFrames with mapped column names.
     """
-
 
     column_mapping_pdf = {
         'Código': 'code',

@@ -16,7 +16,7 @@ from airflow.utils.dates import days_ago  # noqa: E402
 def check_dataframes(**context):
     ti = context['ti']
     df, df_tables = ti.xcom_pull(task_ids='extract_data')
-    
+
     # If both DataFrames are empty, abort
     if df.empty and df_tables.empty:
         return 'skip_transform_load'
