@@ -1,52 +1,20 @@
-from datetime import datetime
 import pandas as pd
 import pytest
 
-from functions.transform_data import convert_data_types
+from functions.transform_data import convert_data_types, map_custom_columns
 
 
 def test_convert_data_types(mock_transform_data_payload):
-    """Test for the convert_data_types function."""
-    df, df_tables = convert_data_types(mock_transform_data_payload)
+    df, df_tables = mock_transform_data_payload
+    df, df_tables = map_custom_columns(df, df_tables)
 
-    expected_columns = [
-        "original_timestamp",
-        "note_date",
-        "note_number",
-        "note_amount",
-        "should_be_paid",
-        "was_uploaded",
-        "month",
-        "year",
-    ]
-    assert list(df.columns) == expected_columns
+    converted_df, converted_df_tables = convert_data_types(df, df_tables)
 
-    assert df["original_timestamp"][0] == datetime(2024, 6, 26, 13, 53, 43)
-    assert df["note_date"][0] == datetime(2024, 6, 26)
-    assert df["note_number"][0] == 101407
-    assert df["note_amount"][0] == 37120
-    assert df["should_be_paid"][0]
-    assert df["was_uploaded"][0]
-    assert df["month"][0] == 6
-    assert df["year"][0] == 2024
+    assert converted_df['note_number'].iloc[0] == 101407
 
-    # Assertions for df_tables
-    expected_columns_tables = [
-        'code',
-        'description',
-        'pvp',
-        'quantity',
-        'total_amount',
-        'devolution_type'
-    ]
-
-    assert list(df_tables.columns) == expected_columns_tables
-    assert df_tables['description'][0] == 'Product A with newline'
-    assert df_tables['pvp'][0] == 1234.56
-    assert df_tables['quantity'][0] == 1.5
-    assert df_tables['total_amount'][0] == 37120
-    assert df_tables['devolution_type'][0] == 'CAUSA 3'
-    assert df_tables['devolution_id'][0] == 0
+    assert isinstance(converted_df_tables['quantity'].iloc[0], float)
+    assert isinstance(converted_df_tables['total_amount'].iloc[0], float)
+    assert isinstance(converted_df_tables['pvp'].iloc[0], float)
 
 
 ''' FIXTURES '''

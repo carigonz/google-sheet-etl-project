@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["carigonz <carolinagonzalez@gmail.com>"]
 readme = "README.md"
-packages = [{include = "airflow-etl-project"}]
 
 [tool.poetry.dependencies]
 python = "^3.9, <3.13"
@@ -35,6 +34,10 @@ poetry-plugin-export = "^1.8.0"
 flake8 = "^5.0.0"
 autopep8 = "^2.0.0"
 
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.3"
