@@ -19,28 +19,19 @@ def create_postgres_connection() -> Engine | Exception:
     Returns:
         Engine: A SQLAlchemy Engine object connected to the PostgreSQL database.
     """
-    print(f"DB_HOST: {DB_HOST}")
-    print(f"DB_PORT: {DB_PORT}")
-    print(f"DB_USER: {DB_USER}")
-    print(f"DB_PASSWORD: {DB_PASSWORD}")
-    print(f"DB_NAME: {DB_NAME}")
-
-# Connection variables for Redshift
 
     # Check if any of the required environment variables are missing
-    # if not all([DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME]):
-    #     raise ValueError("Missing required database connection information in environment variables.")
-    host = 'redshift-pda-cluster.cnuimntownzt.us-east-2.redshift.amazonaws.com'
-    password = 'J7!&L2^Q$4xR'
+    if not all([DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME]):
+        raise ValueError("Missing required database connection information in environment variables.")
     try:
         connection_string = \
-            f"postgresql+psycopg2://2024_carolina_gonzalez:{password}@{host}:5439/pda"
+            f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}"
         print(f"Connection string: {connection_string}")
 
         # Test network connectivity
         try:
-            socket.create_connection((host, 5439), timeout=5)
-            print(f"Network connection to {host}:5439 successful")
+            socket.create_connection((DB_HOST, DB_PORT), timeout=5)
+            print(f"Network connection to {DB_HOST}:{DB_PORT} successful")
         except socket.error as e:
             print(f"Network connection failed: {e}")
 
