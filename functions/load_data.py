@@ -3,9 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.engine import Engine
 
 from utils.db import create_postgres_connection
-# from utils.constants import DB_USER
-
-DB_USER = '2024_carolina_gonzalez'
+from utils.constants import DB_USER
 
 
 def load_data(table_name_devolutions: pd.DataFrame, table_name_pdf: str, **kwargs: any) -> None:
@@ -19,14 +17,9 @@ def load_data(table_name_devolutions: pd.DataFrame, table_name_pdf: str, **kwarg
     engine = None
     try:
         ti = kwargs['ti']
-        df, df_tables = ti.xcom_pull(task_ids='transform_initial_data')
-
-        print('data extracted')
-        print(f"Devolutions data shape: {df.shape}")
-        print(f"PDF tables data shape: {df_tables.shape}")
+        df, df_tables = ti.xcom_pull(task_ids='transform_data')
 
         engine: Engine = create_postgres_connection()
-        print('Engine created')
 
         with engine.connect() as connection:
             print('Connection created')
@@ -50,8 +43,6 @@ def load_data(table_name_devolutions: pd.DataFrame, table_name_pdf: str, **kwarg
                 if_exists="append",
                 index=False,
             )
-            print('PDF tables data loaded')
-        print('Data loaded successfully')
 
     except SQLAlchemyError as e:
         print(f"Database error: {e}")

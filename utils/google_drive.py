@@ -11,7 +11,7 @@ from google.oauth2.service_account import Credentials
 from utils.constants import CREDENTIALS_FILE, SHEET_NAME, WORKSHEET_NAME, PDF_COLUMN
 
 
-def get_google_sheet_data(sheet_name, worksheet_name, filter_column="FORM PC", filter_value='TEST'):
+def get_google_sheet_data(sheet_name, worksheet_name, filter_value='25/08/2024', filter_column="FECHA NOTA"):
     """Access Google Sheet and retrieve data as a DataFrame
 
     Args:
@@ -25,6 +25,8 @@ def get_google_sheet_data(sheet_name, worksheet_name, filter_column="FORM PC", f
     """
     scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
+    print('value searched:')
+    print(filter_value)
     credentials = ServiceAccountCredentials.from_json_keyfile_name(CREDENTIALS_FILE, scope)
 
     client = gspread.authorize(credentials)
@@ -39,9 +41,9 @@ def get_google_sheet_data(sheet_name, worksheet_name, filter_column="FORM PC", f
 
     if filter_column and filter_value:
         filtered_rows = [row for row in data if row.get(filter_column) == filter_value]
-        print(filtered_rows)
     else:
         filtered_rows = data[1:]
+
     # Create a dictionary to map original column names to new column names
     column_mapping = {
         'Marca temporal': 'original_timestamp',
@@ -69,7 +71,7 @@ def get_google_sheet_data(sheet_name, worksheet_name, filter_column="FORM PC", f
     df = df.rename(columns=column_mapping)
 
     # Select only the columns we want in the final DataFrame
-    df = df[list(column_mapping.values())]
+    # df = df[list(column_mapping.values())]
     return df
 
 
@@ -160,12 +162,7 @@ def extract_file_id_from_url(url):
 
 
 def get_original_data():
-    df = get_google_sheet_data(SHEET_NAME, WORKSHEET_NAME)
-
-    print("Data loaded from Google Sheets into the DataFrame:")
-    print(df)
-
-    return df
+    return get_google_sheet_data(SHEET_NAME, WORKSHEET_NAME)
 
 
 def make_df_from_pdfs(data: pd.DataFrame):
@@ -191,11 +188,7 @@ def make_df_from_pdfs(data: pd.DataFrame):
     if all_tables:
         # Combine all tables into a single DataFrame
         result_df = pd.concat(all_tables, ignore_index=True)
-        print("Resulting DataFrame with extracted table data:")
-        print(result_df)
-        print(f"Shape of resulting DataFrame: {result_df.shape}")
 
         return result_df
     else:
-        print("No tables were extracted from any PDFs.")
         return pd.DataFrame()  # Return an empty DataFrame if no tables were found

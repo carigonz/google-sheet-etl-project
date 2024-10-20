@@ -26,7 +26,6 @@ def create_postgres_connection() -> Engine | Exception:
     try:
         connection_string = \
             f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}"
-        print(f"Connection string: {connection_string}")
 
         # Test network connectivity
         try:
