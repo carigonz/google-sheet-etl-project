@@ -12,7 +12,7 @@ You will need `docker`
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/carigonz/data-test.git
+   git clone https://github.com/carigonz/google-sheet-etl-project.git
    ```
 2. Navigate into the project directory:
    ```bash
