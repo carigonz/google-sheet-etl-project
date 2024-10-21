@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from functions.transform_data import convert_data_types, map_custom_columns
+from functions.transform_data import convert_data_types, map_custom_columns, remove_unused_columns
 
 
 def test_convert_data_types(mock_transform_data_payload):
@@ -13,8 +13,30 @@ def test_convert_data_types(mock_transform_data_payload):
     assert converted_df['note_number'].iloc[0] == 101407
 
     assert isinstance(converted_df_tables['quantity'].iloc[0], float)
-    assert isinstance(converted_df_tables['total_amount'].iloc[0], float)
-    assert isinstance(converted_df_tables['pvp'].iloc[0], float)
+    assert isinstance(converted_df_tables['total_amount'].iloc[0], str)
+    assert isinstance(converted_df_tables['pvp'].iloc[0], str)
+
+
+def test_remove_unused_columns(mock_transform_data_payload):
+    df, df_tables = mock_transform_data_payload
+    df, df_tables = map_custom_columns(df, df_tables)
+    df, df_tables = convert_data_types(df, df_tables)
+
+    converted_df, converted_df_tables = remove_unused_columns(df, df_tables)
+
+    assert 'not_used_date' not in converted_df.columns
+    assert 'not_used_column' not in converted_df.columns
+    assert 'Causa de\ndevolucion' not in converted_df_tables.columns
+
+    # Check that other important columns are still present
+    assert 'note_number' in converted_df.columns
+    assert 'product_family' in converted_df.columns
+    assert 'note_date' in converted_df.columns
+    assert 'code' in converted_df_tables.columns
+    assert 'description' in converted_df_tables.columns
+    assert 'quantity' in converted_df_tables.columns
+    assert 'total_amount' in converted_df_tables.columns
+    assert 'pvp' in converted_df_tables.columns
 
 
 ''' FIXTURES '''
