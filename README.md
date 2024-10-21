@@ -1,6 +1,7 @@
-# airflow-etl-project - dump google sheet data
+# Google Sheet ETL project
 
 ## Introduction
+
 This project implements an ELT (Extract, Load, Transform) pipeline to retrieve data from an external Google Sheet and dump in an Amazon Readshift.
 
 The usecase of this project is to generate a custom database from data provided by a supermarket. This supermarket has not access to any database, so we implemented a Google Form for generating an internal database en a GoogleSheet with data of merchandise seized because it has expired or is not suitable for sale, between other cases. This sheet, has a URL for a PDF file which has a table containing a detailed list of products with description, internal code and price. The goal of this project is to generate a process to find all PDFs notes, process them and dump them into a database, generating an own database for future supermarket metrics.
@@ -10,30 +11,32 @@ The usecase of this project is to generate a custom database from data provided 
 You will need `docker`
 
 1. Clone this repository:
-    ```bash
-    git clone https://github.com/carigonz/data-test.git
-    ```
+   ```bash
+   git clone https://github.com/carigonz/data-test.git
+   ```
 2. Navigate into the project directory:
-    ```bash
-    cd data-test
-    ```
+   ```bash
+   cd data-test
+   ```
 3. Configure your envs:
    - On root directory, copy `.env.example` and replace filename for `.env`
    - Paste your env values
    - On root directory copy your `credentials.json`
    - Make sure that env `CREDENTIALS_FILE` has the same value of your `credentials.json` filename.
 4. Start the Airflow instance:
-    ```bash
-    docker-compose build
-    docker-compose up -d
-    ```
+   ```bash
+   docker-compose build
+   docker-compose up -d
+   ```
 5. Access the Airflow user interface in your browser at [http://localhost:8080](http://localhost:8080):
+
    - **Username**: `airflow`
    - **Password**: `airflow`
 
 6. After the above steps, search, unpause and trigger the DAG (`etl_redshift_load_dag`).
 
 ## Data Pipeline
+
 ### Load data from external API
 
 Source data is a private Google Sheet database. Here is an example of data:
@@ -56,14 +59,13 @@ We have three steps to purge this data:
 
 We use Readshift to generate this two tables, `devolutions` and `pdf_devolutions`
 
-
 ## Airflow DAGs
 
 On this approach we have an unique dag.
 
 We implemented some dummy tasks to avoid cases when there is no data for a particular date.
 
-
 ### GitHub Actions
+
 - implemented for python linter flake8
 - implemented for run tests
