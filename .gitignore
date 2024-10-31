@@ -1,6 +1,7 @@
 
 
 test-credentials.json
+credentials.json
 .env
 .vscode
 __pycache__/

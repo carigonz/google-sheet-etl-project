@@ -15,12 +15,15 @@ from airflow.utils.dates import days_ago  # noqa: E402
 
 def check_dataframes(**context):
     ti = context['ti']
-    df, df_tables = ti.xcom_pull(task_ids='extract_data')
-
-    # If both DataFrames are empty, abort
-    if df.empty and df_tables.empty:
+    file_paths = ti.xcom_pull(task_ids='extract_data')
+    
+    df_path, df_tables_path = file_paths
+    if not (os.path.exists(df_path) and os.path.exists(df_tables_path)):
         return 'skip_transform_load'
-    return 'transform_data'  # Continue with the normal flow
+    
+    if os.path.getsize(df_path) == 0 and os.path.getsize(df_tables_path) == 0:
+        return 'skip_transform_load'
+    return 'transform_data'
 
 
 with DAG(

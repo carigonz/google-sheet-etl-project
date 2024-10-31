@@ -1,31 +1,42 @@
 import pandas as pd
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.engine import Engine
+import os
 
 from utils.db import create_postgres_connection
-from utils.constants import DB_USER
+from utils.constants import DB_USER, TEMP_DIR
 
 
-def load_data(table_name_devolutions: pd.DataFrame, table_name_pdf: str, **kwargs: any) -> None:
+def load_data(**context) -> None:
     """
-    Load data from a pandas DataFrame into the specified PostgreSQL table.
+    Load transformed data from parquet files into PostgreSQL database tables.
+    
+    This function reads the transformed DataFrames from parquet files, establishes a database connection,
+    and loads the data into two tables: 'devolutions' and 'pdfs'. After loading, it cleans up temporary files.
 
     Args:
-        data (pd.DataFrame): Data to be inserted.
-        table_name (str): Name of the table to insert the data into.
+        **context: Airflow context dictionary containing task instance and other execution info
+
+    Raises:
+        SQLAlchemyError: If there is an error connecting to or writing to the database
+        Exception: If any other error occurs during execution
     """
+    ti = context['ti']
+    file_paths = ti.xcom_pull(task_ids='transform_data')
+    transformed_df_path, transformed_tables_path = file_paths
+    
+    df = pd.read_parquet(transformed_df_path)
+    df_tables = pd.read_parquet(transformed_tables_path)
+    
     engine = None
     try:
-        ti = kwargs['ti']
-        df, df_tables = ti.xcom_pull(task_ids='transform_data')
-
         engine: Engine = create_postgres_connection()
 
         with engine.connect() as connection:
             print('Connection created')
-            df = df.reset_index()
+
             df.to_sql(
-                table_name_devolutions,
+                'devolutions',
                 connection,
                 schema=f"{DB_USER}_schema",
                 if_exists="append",
@@ -33,16 +44,14 @@ def load_data(table_name_devolutions: pd.DataFrame, table_name_pdf: str, **kwarg
             )
             print('Devolutions data loaded')
 
-            # Reset the index to make it a column
-            df_tables = df_tables.reset_index()
-
             df_tables.to_sql(
-                table_name_pdf,
+                'pdf_devolutions',
                 connection,
                 schema=f"{DB_USER}_schema",
                 if_exists="append",
                 index=False,
             )
+            print('PDFs data loaded')
 
     except SQLAlchemyError as e:
         print(f"Database error: {e}")
@@ -53,3 +62,21 @@ def load_data(table_name_devolutions: pd.DataFrame, table_name_pdf: str, **kwarg
     finally:
         if engine:
             engine.dispose()
+    
+    __clean_temp_files()
+
+
+def __clean_temp_files() -> None:
+    """
+    Clean all files from the temporary directory.
+    """
+    if os.path.exists(TEMP_DIR):
+        files = os.listdir(TEMP_DIR)
+        for file_name in files:
+            file_path = os.path.join(TEMP_DIR, file_name)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                    print(f"Removed file: {file_path}")
+            except Exception as e:
+                print(f"Error removing {file_path}: {e}")

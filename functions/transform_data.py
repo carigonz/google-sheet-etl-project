@@ -1,32 +1,42 @@
+from datetime import datetime
 import pandas as pd
-from utils.constants import PDF_COLUMN
+from utils.constants import PDF_COLUMN, TEMP_DIR
 
-
-def transform_data(**kwargs: any) -> tuple[pd.DataFrame, pd.DataFrame]:
+def transform_data(**context) -> tuple[str, str]:
     """
-    Transform the initial data extracted from Google Sheets and PDF tables.
+    Transform extracted data by mapping columns, removing unused ones, and converting data types.
+    
+    This function takes the parquet files created by extract_data, performs several transformations
+    on both the main DataFrame and PDF tables DataFrame, and saves the transformed data back to 
+    parquet files.
 
     Args:
-        **kwargs: Keyword arguments, expected to contain 'ti' (TaskInstance).
+        **context: Airflow context dictionary containing task instance and other execution info
 
     Returns:
-        tuple[pd.DataFrame, pd.DataFrame]: A tuple containing the transformed main DataFrame and PDF tables DataFrame.
+        tuple[str, str]: A tuple containing the file paths of the transformed parquet files
+            (transformed_df_path, transformed_tables_path)
     """
-    ti = kwargs['ti']
-    df, df_tables = ti.xcom_pull(task_ids='extract_data')
-
+    ti = context['ti']
+    df_path, df_tables_path = ti.xcom_pull(task_ids='extract_data')
+    
+    df = pd.read_parquet(df_path)
+    df_tables = pd.read_parquet(df_tables_path)
+    
     df, df_tables = map_custom_columns(df, df_tables)
 
     df, df_tables = remove_unused_columns(df, df_tables)
 
     df, df_tables = convert_data_types(df, df_tables)
 
-    print('df_tables')
-    print(df_tables.head())
-    print(df_tables.columns)
-    print(df_tables.shape)
-
-    return df, df_tables
+    # Save transformed DataFrames to parquet files in same dir
+    transformed_df_path = f'{TEMP_DIR}/transformed_df.parquet'
+    transformed_tables_path = f'{TEMP_DIR}/transformed_tables.parquet'
+    
+    df.to_parquet(transformed_df_path)
+    df_tables.to_parquet(transformed_tables_path)
+    
+    return transformed_df_path, transformed_tables_path
 
 
 def convert_data_types(df: pd.DataFrame, df_tables: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -111,6 +121,7 @@ def map_custom_columns(df: pd.DataFrame, df_tables: pd.DataFrame) -> tuple[pd.Da
         'ComCalid': 'not_used_column'
     }
     df_tables = __map_columns_to_tables(df=df_tables, column_mapping=column_mapping_pdf)
+    df_tables['extracted_date'] = datetime.today()
 
     column_mapping_devolution = {
         'Marca temporal': 'original_timestamp',
@@ -131,6 +142,7 @@ def map_custom_columns(df: pd.DataFrame, df_tables: pd.DataFrame) -> tuple[pd.Da
         'MES CONFIRMADA': 'confirmed_month'
     }
     df = __map_columns_to_tables(df, column_mapping=column_mapping_devolution)
+    df['extracted_date'] = datetime.today()
 
     return df, df_tables
 
