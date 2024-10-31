@@ -7,37 +7,46 @@ from utils.constants import SHEET_NAME, WORKSHEET_NAME, PDF_COLUMN, NOTE_COLUMN,
 import pandas as pd
 
 
-def extract_data(**kwargs: any) -> tuple[str, str] | None:
+def extract_data(processing_dates: str, **context) -> tuple[str, str]:
     """
-    Extract data from Google Sheets and PDF files, saving results as parquet files.
-
-    This function retrieves data from a Google Sheet for a specific date (either provided or yesterday),
-    extracts information from associated PDF files, and saves both datasets as parquet files.
-
+    Extract data for multiple dates
+    
     Args:
-        **kwargs: Keyword arguments
-            custom_date (str, optional): Date in format 'DD/MM/YYYY' to extract data for.
-            If not provided, defaults to yesterday.
-
-    Returns:
-        tuple[str, str] | None: A tuple containing paths to the saved parquet files:
-            - Path to main DataFrame parquet file
-            - Path to PDF tables DataFrame parquet file
-            Returns None if extraction fails
+        processing_dates (List[str]): List of dates to process in DD/MM/YYYY format
     """
-    custom_date = kwargs.get('custom_date')
-    if custom_date is None:
-        yesterday = datetime.now(ZoneInfo("UTC")) - timedelta(days=1)
-        custom_date = yesterday.strftime('%d/%m/%Y')
+    dates_list = processing_dates.split(',')
+    dates_list = [date.strip() for date in dates_list]
+    dfs = []
+    dfs_tables = []
+    
+    for date in dates_list:
+        try:
+            df, df_tables = __extract_single_date(date)
+            dfs.append(df)
+            dfs_tables.append(df_tables)
+        except Exception as e:
+            print(f"Error processing date {date}: {e}")
+            continue
+    
+    if not dfs or not dfs_tables:
+        raise ValueError("No data was extracted for any of the provided dates")
+        
+    final_df = pd.concat(dfs, ignore_index=True)
+    final_df_tables = pd.concat(dfs_tables, ignore_index=True)
+    
+    return __make_parquet_files(final_df, final_df_tables)
 
-    df: pd.DataFrame = get_google_sheet_data(SHEET_NAME, WORKSHEET_NAME, custom_date)
+def __extract_single_date(date: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Extract data for a single date
+    """
+    df: pd.DataFrame = get_google_sheet_data(SHEET_NAME, WORKSHEET_NAME, date)
 
     new_df = df[[PDF_COLUMN, NOTE_COLUMN]]
 
     df_tables = make_df_from_pdfs(new_df)
 
-    return __make_parquet_files(df, df_tables)
-
+    return df, df_tables
 
 def __create_temp_dir():
     """
@@ -48,7 +57,6 @@ def __create_temp_dir():
     """
     os.makedirs(TEMP_DIR, exist_ok=True)
     return TEMP_DIR
-
 
 def __make_parquet_files(df: pd.DataFrame, df_tables: pd.DataFrame) -> tuple[str, str]:
     """
@@ -63,6 +71,12 @@ def __make_parquet_files(df: pd.DataFrame, df_tables: pd.DataFrame) -> tuple[str
             - Path to main DataFrame parquet file
             - Path to PDF tables DataFrame parquet file
     """
+    # This is to avoid errors when converting to parquet
+    numeric_columns = ['year', 'month']
+    for col in numeric_columns:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype('int64')
+    
     __create_temp_dir()
     df_path = f'{TEMP_DIR}/df_devolutions.parquet'
     df_tables_path = f'{TEMP_DIR}/df_tables.parquet'

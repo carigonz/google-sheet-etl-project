@@ -16,3 +16,5 @@ PDF_COLUMN = 'pdf_url'
 NOTE_COLUMN = 'note_number'
 CREDENTIALS_FILE = os.getenv("CREDENTIALS_FILE")
 TEMP_DIR = '/tmp/airflow_data'
+DEFAULT_DATES = os.getenv("DEFAULT_DATES")
+

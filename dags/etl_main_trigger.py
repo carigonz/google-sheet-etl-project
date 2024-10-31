@@ -7,11 +7,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from functions.transform_data import transform_data  # noqa: E402
 from functions.extract_data import extract_data  # noqa: E402
 from functions.load_data import load_data  # noqa: E402
+from functions.load_data import load_data  # noqa: E402
 from airflow import DAG  # noqa: E402
 from airflow.operators.python import PythonOperator, BranchPythonOperator  # noqa: E402
 from airflow.operators.dummy import DummyOperator  # noqa: E402
 from airflow.utils.dates import days_ago  # noqa: E402
-
+from utils.constants import DEFAULT_DATES  # noqa: E402
 
 def check_dataframes(**context):
     ti = context['ti']
@@ -45,10 +46,7 @@ with DAG(
         python_callable=extract_data,
         provide_context=True,
         op_kwargs={
-            # For testing purposes, we provide a list of dates with data
-            # to avoid running the task for all dates (not all days have data)
-            # 1/07/2024 | 26/06/2024 | 8/09/2024 | DD/MM/2024
-            "custom_date": "10/10/2024",
+            "processing_dates": DEFAULT_DATES,
         },
     )
 
