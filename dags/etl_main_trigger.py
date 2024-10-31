@@ -7,12 +7,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from functions.transform_data import transform_data  # noqa: E402
 from functions.extract_data import extract_data  # noqa: E402
 from functions.load_data import load_data  # noqa: E402
-from functions.load_data import load_data  # noqa: E402
 from airflow import DAG  # noqa: E402
 from airflow.operators.python import PythonOperator, BranchPythonOperator  # noqa: E402
 from airflow.operators.dummy import DummyOperator  # noqa: E402
 from airflow.utils.dates import days_ago  # noqa: E402
 from utils.constants import DEFAULT_DATES  # noqa: E402
+
 
 def check_dataframes(**context):
     ti = context['ti']

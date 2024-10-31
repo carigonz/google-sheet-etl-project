@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
 import os
 
 from utils.google_drive import get_google_sheet_data, make_df_from_pdfs
@@ -10,7 +8,7 @@ import pandas as pd
 def extract_data(processing_dates: str, **context) -> tuple[str, str]:
     """
     Extract data for multiple dates
-    
+
     Args:
         processing_dates (List[str]): List of dates to process in DD/MM/YYYY format
     """
@@ -18,7 +16,7 @@ def extract_data(processing_dates: str, **context) -> tuple[str, str]:
     dates_list = [date.strip() for date in dates_list]
     dfs = []
     dfs_tables = []
-    
+
     for date in dates_list:
         try:
             df, df_tables = __extract_single_date(date)
@@ -27,14 +25,15 @@ def extract_data(processing_dates: str, **context) -> tuple[str, str]:
         except Exception as e:
             print(f"Error processing date {date}: {e}")
             continue
-    
+
     if not dfs or not dfs_tables:
         raise ValueError("No data was extracted for any of the provided dates")
-        
+
     final_df = pd.concat(dfs, ignore_index=True)
     final_df_tables = pd.concat(dfs_tables, ignore_index=True)
-    
+
     return __make_parquet_files(final_df, final_df_tables)
+
 
 def __extract_single_date(date: str) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
@@ -48,6 +47,7 @@ def __extract_single_date(date: str) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     return df, df_tables
 
+
 def __create_temp_dir():
     """
     Create a temporary directory for storing parquet files.
@@ -57,6 +57,7 @@ def __create_temp_dir():
     """
     os.makedirs(TEMP_DIR, exist_ok=True)
     return TEMP_DIR
+
 
 def __make_parquet_files(df: pd.DataFrame, df_tables: pd.DataFrame) -> tuple[str, str]:
     """
@@ -76,7 +77,7 @@ def __make_parquet_files(df: pd.DataFrame, df_tables: pd.DataFrame) -> tuple[str
     for col in numeric_columns:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0).astype('int64')
-    
+
     __create_temp_dir()
     df_path = f'{TEMP_DIR}/df_devolutions.parquet'
     df_tables_path = f'{TEMP_DIR}/df_tables.parquet'
