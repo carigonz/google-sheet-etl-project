@@ -8,7 +8,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from google.oauth2.service_account import Credentials
-from utils.constants import CREDENTIALS_FILE, SHEET_NAME, WORKSHEET_NAME, PDF_COLUMN
+from utils.constants import CREDENTIALS_FILE, NOTE_COLUMN, SHEET_NAME, WORKSHEET_NAME, PDF_COLUMN
 
 
 def get_google_sheet_data(sheet_name, worksheet_name, filter_value='25/08/2024', filter_column="FECHA NOTA"):
@@ -180,7 +180,7 @@ def make_df_from_pdfs(data: pd.DataFrame):
         if tables:
             for table in tables:
                 # add foreign key to original table
-                table['devolution_id'] = index
+                table['devolution_id'] = row[NOTE_COLUMN]
                 all_tables.append(table)
         else:
             print(f"No tables found in PDF for index {index}")
