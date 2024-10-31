@@ -16,7 +16,7 @@ You will need `docker`
    ```
 2. Navigate into the project directory:
    ```bash
-   cd data-test
+   cd google-sheet-etl-project
    ```
 3. Configure your envs:
    - On root directory, copy `.env.example` and replace filename for `.env`
