@@ -10,7 +10,7 @@ from utils.constants import DB_USER, TEMP_DIR
 def load_data(**context) -> None:
     """
     Load transformed data from parquet files into PostgreSQL database tables.
-    
+
     This function reads the transformed DataFrames from parquet files, establishes a database connection,
     and loads the data into two tables: 'devolutions' and 'pdfs'. After loading, it cleans up temporary files.
 
@@ -24,10 +24,10 @@ def load_data(**context) -> None:
     ti = context['ti']
     file_paths = ti.xcom_pull(task_ids='transform_data')
     transformed_df_path, transformed_tables_path = file_paths
-    
+
     df = pd.read_parquet(transformed_df_path)
     df_tables = pd.read_parquet(transformed_tables_path)
-    
+
     engine = None
     try:
         engine: Engine = create_postgres_connection()
@@ -62,7 +62,7 @@ def load_data(**context) -> None:
     finally:
         if engine:
             engine.dispose()
-    
+
     __clean_temp_files()
 
 

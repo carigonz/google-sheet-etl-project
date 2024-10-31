@@ -2,12 +2,13 @@ from datetime import datetime
 import pandas as pd
 from utils.constants import PDF_COLUMN, TEMP_DIR
 
+
 def transform_data(**context) -> tuple[str, str]:
     """
     Transform extracted data by mapping columns, removing unused ones, and converting data types.
-    
+
     This function takes the parquet files created by extract_data, performs several transformations
-    on both the main DataFrame and PDF tables DataFrame, and saves the transformed data back to 
+    on both the main DataFrame and PDF tables DataFrame, and saves the transformed data back to
     parquet files.
 
     Args:
@@ -19,10 +20,10 @@ def transform_data(**context) -> tuple[str, str]:
     """
     ti = context['ti']
     df_path, df_tables_path = ti.xcom_pull(task_ids='extract_data')
-    
+
     df = pd.read_parquet(df_path)
     df_tables = pd.read_parquet(df_tables_path)
-    
+
     df, df_tables = map_custom_columns(df, df_tables)
 
     df, df_tables = remove_unused_columns(df, df_tables)
@@ -32,10 +33,10 @@ def transform_data(**context) -> tuple[str, str]:
     # Save transformed DataFrames to parquet files in same dir
     transformed_df_path = f'{TEMP_DIR}/transformed_df.parquet'
     transformed_tables_path = f'{TEMP_DIR}/transformed_tables.parquet'
-    
+
     df.to_parquet(transformed_df_path)
     df_tables.to_parquet(transformed_tables_path)
-    
+
     return transformed_df_path, transformed_tables_path
 
 
